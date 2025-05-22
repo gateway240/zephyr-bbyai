@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Zephyr
+modules
+zephyr
+build
+.west

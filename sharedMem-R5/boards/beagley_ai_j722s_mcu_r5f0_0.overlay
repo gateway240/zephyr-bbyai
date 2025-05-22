@@ -1,0 +1,57 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include <zephyr/dt-bindings/gpio/gpio.h>
+
+ / {
+    aliases {
+        led0 = &mcu_led;
+        btn0 = &mcu_btn;
+    };
+
+    leds {
+        compatible = "gpio-leds";
+
+        mcu_led: led_gpio7 {
+            // GPIO7 = CE1
+            // Zen Hat maps to PYMNL.9
+            // SoC pin B3 - Mode 7:MCU_GPIO0_9  - Address 0x04084024
+            gpios = <&mcu_gpio0 9 GPIO_ACTIVE_HIGH>;
+        };
+
+        mcu_btn: btn_gpio24 {
+            // GPIO24
+            // Zen Hat maps to Rotary encoder's push-button
+            // SoC pin C8 - Mode 7:MCU_GPIO0_10 - Address 0x04084028
+            gpios = <&mcu_gpio0 10 GPIO_ACTIVE_HIGH>;
+        };
+    };
+
+    // ADDED, but does not work.
+    pinctrl_mcu: pinctrl_mcu@4084000 {
+        compatible = "ti,k3-pinctrl";
+        reg = <0x04084000 0x88>;
+        status = "okay";
+    };
+
+};
+
+// ADDED, but does not work.
+&pinctrl_mcu {
+    // TODO: Pinmux seems not to be working
+    // Had to execute 
+    //      gpioset gpiochip0 9=1
+    //      gpioget gpiochip0 10
+    // on clean boot to make it flash the LED and read the pin.
+    mcu_gpio0_led_btn_default: mcu_gpio0_led_btn_default {
+        pinmux = <K3_PINMUX(0x0024, PIN_OUTPUT, MUX_MODE_7)>; /* (B3) GPIO7*/
+        pinmux = <K3_PINMUX(0x0028, PIN_INPUT, MUX_MODE_7)>; /* (C8) GPIO24*/
+    };
+};
+
+&mcu_gpio0 {
+    pinctrl-0 = <&mcu_gpio0_led_btn_default>;
+    pinctrl-names = "default";
+    status = "okay";
+};
